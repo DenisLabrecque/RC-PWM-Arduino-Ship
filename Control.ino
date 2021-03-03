@@ -7,8 +7,9 @@ const int PIN_PWM_MOTOR2 = A4; // TODO change
 const uint8_t DIR_MOTOR2 = A2; // TODO change
 
 const float DEADZONE = 0.05f; // Percent positive and negative throttle that is nonreactive
+const float SWITCH_TOLERANCE = 0.25; // Percent that a stick must reach to activate a function
+const float PWM_MIDPOINT = 1500;
 
-unsigned long now;                        // timing variables to update data at a regular interval                  
 unsigned long rc_update;
 const int channels = 6;                   // specify the number of receiver channels
 float RC_in[channels];                    // an array to store the calibrated input from receiver
@@ -22,21 +23,23 @@ void setup() {
 
 
 void loop() {    
-    now = millis();
-    
-    if(RC_avail() || now - rc_update > 25)   // if RC data is available or 25ms has passed since last update (adjust to be equal or greater than the frame rate of receiver) {
-      rc_update = now;                           
-    //print_RCpwm();                        // uncommment to print raw data from receiver to serial
+  if(RC_avail() || millis() - rc_update > 25) // if RC data is available or 25ms has passed since last update (adjust to be equal or greater than the frame rate of receiver)
+    rc_update = millis();
 
-    control(RC_decode(1), RC_decode(2), RC_decode(4), RC_decode(3), RC_decode(5), RC_decode(6));
+  control(RC_decode(1), RC_decode(2), RC_decode(4), RC_decode(3), RC_decode(5), RC_decode(6));
 }
 
 
 // Since all the inputs are passed in, here is an easy place to delegate all control responsibility.
-void control(float throttle, float rudder, float vertical, float horizontal, float switch1, float switch2) {
+// All inputs are from -1.0f to 1.0f.
+// Primary switch true: second stick controls doors.
+// Primary switch false: second stick controls lights.
+void control(float throttle, float rudder, float vertical, float horizontal, float primarySwitch, float secondarySwitch) {
   mix_motors(throttle, rudder);
   control_rudder(rudder);
-  animate_radar(switch2);
+  animate_radar(primarySwitch, secondarySwitch);
+  animate_doors(primarySwitch, vertical, horizontal);
+  animate_lights(primarySwitch, horizontal);
 }
 
 
@@ -112,4 +115,8 @@ long map(float x, float in_min, float in_max, long out_min, long out_max) {
 
 bool isNegative(short value) {
   return value < 0;
+}
+
+bool isToggled(float value) {
+  return value > 0;
 }
