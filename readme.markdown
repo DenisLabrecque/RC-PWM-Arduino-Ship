@@ -1,11 +1,13 @@
 # Arduino Nano RC Controls for 1/72 Scale Frégate Forbin Model
+![Forbin](https://www.corsenetinfos.corsica/photo/art/grande/8284150-12962402.jpg)
+This sketch is intended to control a 3D printed two-meter scale model from Arduino Nano.
+
 *Note: because this program is in construction, its outputs have not been tested and may not work.*
-This sketch is intended to control a 3D printed scale model that's two meters long.
 
 ## What it Does
-First, intercepts the PWM signals emitted by my receiver. Then, mixes the throttle and rudder channel to drive the motors asymmetrically and control the rudder. This uses only two channels (throttle and rudder), so everything else is free to control decorative systems.
+First, intercepts the PWM signals emitted by my receiver. Then, mixes the throttle and rudder channel to drive the motors asymmetrically and control the rudder. This uses only two channels (throttle and rudder), so everything else is free to control decorative systems. A normal radio controller only mix would either take up both sticks (driving like a tank) or require mixes between channels; while mixes are fine, they are proprietary and limited by some systems, which would mean upgrading to a more expensive radio. Also, buying a DC motor board is cheaper than getting RC speed controllers and ESCs. Additionally, custom programming keeps possibilities open for limitless model fonctionalities later.
 
-With a 6 channel Spektrum Tx/Rx, the gear and flap switches are boolean toggles (either PWM 1000 or 2000), while the vertical and horizontal axes are linear (PWM 1000 increasing to 2000, midpoint at 1500).
+With a 6 channel Spektrum Tx/Rx, the left stick and right stick both are two linear channels, for a total of 4 (all from PWM 1000 to 2000, with a midpoint at 1500); while the gear and flap switches are boolean toggles (either PWM 1000 or 2000).
 
 With switches controlling modes, one could operate cranes, cannons, move doors up and down, and more with the horizontal and vertical axes. In my case, I'd like to switch lights to different modes, and control three separate bay doors. I could also switch the radar's rotation on or off.
 
@@ -19,5 +21,8 @@ With switches controlling modes, one could operate cranes, cannons, move doors u
       - Continuous Rotation Servo [rotating main radar]
    - 2.5kg Goteck Metal Gear Micro Servo [directing rudder]
 
+### Nano Pinout Reference
+![Nano Pinout](arduino-nano-pinout.jpg)
+
 ## Thanks
-Thanks to the code by Kelvin Nelson as found here: https://create.arduino.cc/projecthub/kelvineyeone/read-pwm-decode-rc-receiver-input-and-apply-fail-safe-6b90eb
+Thanks to the code by Kelvin Nelson as found here: [Read PWM, Decode RC Receiver Input, and Apply Fail-Safe](https://create.arduino.cc/projecthub/kelvineyeone/read-pwm-decode-rc-receiver-input-and-apply-fail-safe-6b90eb)
