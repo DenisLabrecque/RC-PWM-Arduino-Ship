@@ -1,4 +1,5 @@
-NOTE: THIS PROGRAM IS IN CONSTRUCTION AND ITS OUTPUTS MAY NOT WORK PROPERLY
+# Arduino Nano RC Controls for 1/72 Scale Frégate Forbin Model
+*Note: because this program is in construction, its outputs have not been tested and may not work.*
 This sketch is intended to control a 3D printed scale model that's two meters long.
 
 ## What it Does
@@ -17,3 +18,6 @@ With switches controlling modes, one could operate cranes, cannons, move doors u
          - PCA9685 16 Channel 12-Bit PWM Servo Motor Driver IIC [LED driver]
       - Continuous Rotation Servo [rotating main radar]
    - 2.5kg Goteck Metal Gear Micro Servo [directing rudder]
+
+## Thanks
+Thanks to the code by Kelvin Nelson as found here: https://create.arduino.cc/projecthub/kelvineyeone/read-pwm-decode-rc-receiver-input-and-apply-fail-safe-6b90eb
