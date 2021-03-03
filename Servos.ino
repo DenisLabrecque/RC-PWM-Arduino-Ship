@@ -70,10 +70,3 @@ void animate_doors(float primarySwitch, float vertical, float horizontal) {
     }
   }
 }
-
-short sign(float value) {
-  if(value > 0)
-    return 1;
-  else
-    return -1;
-}

@@ -49,9 +49,9 @@ void mix_motors(float throttle, float rudder) {
   // Throttles get controlled via MDD10A board
   // Control motor direction
   short forwards;
-  if(DEADZONE < throttle)
+  if(DEADZONE < throttle || DEADZONE < rudder) // Second condition allows in-place turns
     forwards = 1;
-  else if(throttle < -DEADZONE)
+  else if(throttle < -DEADZONE || rudder < -DEADZONE)
     forwards = -1;
   else
     forwards = 0;
@@ -119,4 +119,11 @@ bool isNegative(short value) {
 
 bool isToggled(float value) {
   return value > 0;
+}
+
+short sign(float value) {
+  if(value > 0)
+    return 1;
+  else
+    return -1;
 }

@@ -148,7 +148,7 @@
  
 // PWM input pins, any of the following pins can be used: digital 0 - 13 or analog A0 - A5 
 
-const int pwmPIN[]={2,3,4,5,6,7}; // an array to identify the PWM input pins (the array can be any length) 
+const int pwmPIN[]={2,4,7,8,9,10}; // an array to identify the PWM input pins (the array can be any length) 
                                   // first pin is channel 1, second is channel 2...etc
 
 int RC_inputs = 0;                // The number of pins in pwmPIN that are connected to an RC receiver. Addition pins not connected to an RC receiver could be used for any other purpose i.e. detecting the echo pulse on an HC-SR04 ultrasonic distance sensor
@@ -168,7 +168,7 @@ int RC_max[6] = { 1908,   1908,   1908,   1908,   1908,   1908};
 
 // fail safe positions
 
-float RC_failsafe[] = {0.00, 0.00, 1, 0.00, -0.25, 0.00};
+float RC_failsafe[] = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
    
 // enter a failsafe position (in the range of -+1) for each RC channel in case radio signal is lost
 // if the array is the incorrect length for the number of RC channels, the failsafe will default to neutral i.e. 0. 
