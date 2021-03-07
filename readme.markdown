@@ -26,6 +26,9 @@ The guns will rotate to face a constant direction based on a magnetometer (compa
 ### Garage Doors
 Bay doors will have the possibility of opening and closing based on radio inputs.
 
+### Sound
+For now, the plan is to add a horn and perhaps a missile siren. These will be artificially generated sound waves that do not require an SD card.
+
 ## Electronics
 - 12V SLA battery
    - Cytron 10A 5-30V Dual DC Motor Driver
