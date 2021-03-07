@@ -11,6 +11,21 @@ With a 6 channel Spektrum Tx/Rx, the left stick and right stick both are two lin
 
 With switches controlling modes, one could operate cranes, cannons, move doors up and down, and more with the horizontal and vertical axes. In my case, I'd like to switch lights to different modes, and control three separate bay doors. I could also switch the radar's rotation on or off.
 
+### Dual Thrust
+Both motors operate independently, and provide asymmetric thrust in coordination with the rudder, both forwards and backwards. When the ship is stopped, the motors can be activated in opposite directions for in-place turns. The rudder signal is intercepted but not changed.
+
+### Lighting
+The lighting scheme will be chosen based on whether the ship is motionless (at anchor) or under way (steaming lights). Otherwise, the helipad, bridge, and deck lights also will have manual control.
+
+### Radar
+The radar can be activated from one of the radio switches at a distance.
+
+### Gun Rotation
+The guns will rotate to face a constant direction based on a magnetometer (compass).
+
+### Garage Doors
+Bay doors will have the possibility of opening and closing based on radio inputs.
+
 ## Electronics
 - 12V SLA battery
    - Cytron 10A 5-30V Dual DC Motor Driver
