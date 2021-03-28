@@ -146,11 +146,15 @@
  *  USER DEFINED VARIABLES (MODIFY TO SUIT YOUR APPLICATION)
  */
  
-// PWM input pins, any of the following pins can be used: digital 0 - 13 or analog A0 - A5 
-
-const int pwmPIN[]={2,4,7,8,9,10}; // an array to identify the PWM input pins (the array can be any length) 
-                                  // first pin is channel 1, second is channel 2...etc
-
+// PWM input pins, any of the following pins can be used: digital 0 - 13 or analog A0 - A5
+// Throttle  12
+// Aileron
+// Elevator
+// Rudder    9
+// Gear      8
+// Auxiliary
+const int pwmPIN[]={12,11,10,9,8,7}; // an array to identify the PWM input pins (the array can be any length)
+                                  
 int RC_inputs = 0;                // The number of pins in pwmPIN that are connected to an RC receiver. Addition pins not connected to an RC receiver could be used for any other purpose i.e. detecting the echo pulse on an HC-SR04 ultrasonic distance sensor
                                   // When 0, it will automatically update to the number of pins specified in pwmPIN[] after calling setup_pwmRead().                                                
 // Calibration of each RC channel:
@@ -162,7 +166,7 @@ int RC_inputs = 0;                // The number of pins in pwmPIN that are conne
 
 //SANWA 6CH 40MHz with corona RP6D1  
 //                THR     AIL     RUD     ELE     GEAR    AUX1
-int RC_min[6] = {  968,   964,    1072,   1068,   1072,   1076};
+int RC_min[6] = { 1072,   1072,   1072,   1068,   1072,   1076};
 int RC_mid[6] = { 1500,   1392,   1428,   1484,   1500,   1500};
 int RC_max[6] = { 1908,   1908,   1908,   1908,   1908,   1908};
 

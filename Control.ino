@@ -1,12 +1,12 @@
 // Denis Labrecque, March 2021
 
 // Nano pins 11, 10, 9, 6, 5, and 3 are PWM.
-const int PIN_PWM_MOTOR1 = A3; // TODO change
-const uint8_t DIR_MOTOR1 = A1; // TODO change
-const int PIN_PWM_MOTOR2 = A4; // TODO change
-const uint8_t DIR_MOTOR2 = A2; // TODO change
+const byte PIN_PWM_MOTOR1 = 3; // Digital PWM pin (~)
+const byte PIN_PWM_MOTOR2 = 5; // Digital PWM pin (~)
+const byte DIR_MOTOR1 = A6; // Analog pin
+const byte DIR_MOTOR2 = A7; // Analog pin
 
-const float DEADZONE = 0.05f; // Percent positive and negative throttle that is nonreactive
+const float DEADZONE = 0.09f; // Percent positive and negative throttle that is nonreactive
 const float SWITCH_TOLERANCE = 0.25; // Percent that a stick must reach to activate a function
 const float PWM_MIDPOINT = 1500;
 
@@ -15,18 +15,21 @@ const int channels = 6;                   // specify the number of receiver chan
 float RC_in[channels];                    // an array to store the calibrated input from receiver
 
 void setup() {
-    setup_pwmRead();
-    setup_motors();
-    setup_servos();
-    Serial.begin(9600);
+  setup_pwmRead();
+  setup_motors();
+  setup_servos();
+  Serial.begin(9600);
 }
 
-
-void loop() {    
-  if(RC_avail() || millis() - rc_update > 25) // if RC data is available or 25ms has passed since last update (adjust to be equal or greater than the frame rate of receiver)
+int pwm_value;
+void loop() {
+  // if RC data is available or 25ms has passed since last update
+  // (adjust to be equal or greater than the frame rate of receiver)
+  if(RC_avail() || millis() - rc_update > 25)
     rc_update = millis();
 
-  control(RC_decode(1), RC_decode(2), RC_decode(4), RC_decode(3), RC_decode(5), RC_decode(6));
+  // RC_decode() gets received inputs in order as a channel number, starting at channel 1, channel 2, etc.
+  control(RC_decode(1), RC_decode(2), RC_decode(3), RC_decode(4), RC_decode(5), RC_decode(6));
 }
 
 
@@ -34,12 +37,44 @@ void loop() {
 // All inputs are from -1.0f to 1.0f.
 // Primary switch true: second stick controls doors.
 // Primary switch false: second stick controls lights.
-void control(float throttle, float rudder, float vertical, float horizontal, float primarySwitch, float secondarySwitch) {
+void control(float throttle, float aileron, float elevator, float rudder, float gear, float auxiliary) {
+  print_received_values(throttle, aileron, elevator, rudder, gear, auxiliary);
   mix_motors(throttle, rudder);
   control_rudder(rudder);
-  animate_radar(primarySwitch, secondarySwitch);
-  animate_doors(primarySwitch, vertical, horizontal);
-  animate_lights(primarySwitch, horizontal);
+  animate_radar(gear, auxiliary);
+  //animate_lights(primarySwitch, horizontal);
+}
+
+
+// Use this to check that the channels are correct
+void print_received_values(float throttle, float aileron, float elevator, float rudder, float gear, float auxiliary) {
+  Serial.print("Throttle: ");
+  Serial.print(throttle);
+  Serial.print(" Aileron: ");
+  Serial.print(aileron);
+  Serial.print(" Elevator: ");
+  Serial.print(elevator);
+  Serial.print(" Rudder: ");
+  Serial.print(rudder);
+  Serial.print(" Gear: ");
+  Serial.print(gear);
+  Serial.print(" Auxiliary: ");
+  Serial.println(auxiliary);
+}
+
+
+// Simple throttle that mixes only the throttle channel to go forwards
+void test_throttle(float throttle) {
+  Serial.print("Throttle: ");
+  Serial.print(throttle);
+
+  digitalWrite(DIR_MOTOR1, HIGH);
+  float proportional = map(abs(throttle), 0.0f, 1.0f, 0, 255);
+
+  Serial.print(" Proportional: ");
+  Serial.println(proportional);
+  
+  analogWrite(PIN_PWM_MOTOR1, proportional);
 }
 
 
@@ -87,14 +122,18 @@ void mix_motors(float throttle, float rudder) {
   // Clamp values
   speed1 = constrain(speed1, 0, 255);
   speed2 = constrain(speed2, 0, 255);
-  
-  Serial.println();
-  Serial.print("Speed1: ");
-  Serial.print(speed1 * forwards1);
-  Serial.print(" Speed2: ");
-  Serial.print(speed2 * forwards2);
-  digitalWrite(DIR_MOTOR1, forwards1);
-  digitalWrite(DIR_MOTOR2, forwards2);
+
+  // Direction
+  if(forwards1 >= 0)
+    digitalWrite(DIR_MOTOR1, HIGH);
+  else
+    digitalWrite(DIR_MOTOR1, LOW);
+  if(forwards2 >= 0)
+    digitalWrite(DIR_MOTOR2, HIGH);
+  else
+    digitalWrite(DIR_MOTOR2, LOW);
+
+  // Speed
   analogWrite(PIN_PWM_MOTOR1, speed1);
   analogWrite(PIN_PWM_MOTOR2, speed2);
 }
@@ -102,8 +141,8 @@ void mix_motors(float throttle, float rudder) {
 
 void setup_motors() {
   pinMode(PIN_PWM_MOTOR1, OUTPUT);
-  pinMode(DIR_MOTOR1, OUTPUT);
   pinMode(PIN_PWM_MOTOR2, OUTPUT);
+  pinMode(DIR_MOTOR1, OUTPUT);
   pinMode(DIR_MOTOR2, OUTPUT);
 }
 
