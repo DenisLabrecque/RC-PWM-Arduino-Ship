@@ -5,22 +5,29 @@
 // Nano pins 11, 10, 9, 6, 5, and 3 are PWM.
 const byte PIN_PWM_RUDDER = A0;
 const byte PIN_PWM_RADAR = A1;
+const byte OUT_STABILIZER1 = A2;
+const byte OUT_STABILIZER2 = A3;
 
 const unsigned short RADAR_SPEED = 60; // Adjust the radar to 15 rpm in servo microseconds
 
 Servo rudder_servo;
 Servo radar_servo;
-Servo heli_door_servo;
+Servo stabilizer1;
+Servo stabilizer2;
 
 void setup_servos() {
   rudder_servo.attach(PIN_PWM_RUDDER);
   radar_servo.attach(PIN_PWM_RADAR);
+  stabilizer1.attach(OUT_STABILIZER1);
+  stabilizer2.attach(OUT_STABILIZER2);
 }
 
 void control_rudder(float rudder) {
   // Rudder connected to external power source but Arduino pin
   short rudderDegrees = map(rudder, -1.0f, 1.0f, 0, 180);
   rudder_servo.write(rudderDegrees); // Position in degrees from 0 to 180, 90 being the midpoint
+  stabilizer1.write(rudderDegrees);
+  stabilizer2.write(rudderDegrees);
   Serial.print(" Rudder: ");
   Serial.print(rudderDegrees);
 }

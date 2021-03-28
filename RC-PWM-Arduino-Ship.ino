@@ -48,10 +48,10 @@
 // void           print_RCpwm()              Prints the RC channel raw data to serial port (used for calibration).
 
 // GENERIC PWM MEASUREMENTS
-// boolean        PWM_read(channel number)   returns a HIGH when a new pulse has been detected on a particular channel. 
+// boolean        PWM_read(channel number)   returns a HIGH when a new pulse has been detected on a particular channel.
 //                                           The function saves the pulse data to variables outside the interrupt routines
 //                                           and must be called just before using the rest of PWM functions.
-// unsigned long  PWM_time()                 returns the time at the start of pulse 
+// unsigned long  PWM_time()                 returns the time at the start of pulse
 // float          PWM()                      returns the pulse width
 // float          PWM_period()               returns the time between pulses
 // float          PWM_freq()                 calculates the frequency
@@ -150,7 +150,7 @@
 // Throttle  12
 // Aileron
 // Elevator
-// Rudder    9
+// Rudder    11
 // Gear      8
 // Auxiliary
 const int pwmPIN[]={12,11,10,9,8,7}; // an array to identify the PWM input pins (the array can be any length)
@@ -164,10 +164,8 @@ int RC_inputs = 0;                // The number of pins in pwmPIN that are conne
 // FYI: the function print_PWM() will print the raw pulse width data for all the RC channels to the serial port.
 // if the RC_min[], RC_mid[], RC_max[] are empty or have missing data the calibration will default to min 1000us, mid 1500us and max 2000us.
 
-//SANWA 6CH 40MHz with corona RP6D1  
-//                THR     AIL     RUD     ELE     GEAR    AUX1
 int RC_min[6] = { 1072,   1072,   1072,   1068,   1072,   1076};
-int RC_mid[6] = { 1500,   1392,   1428,   1484,   1500,   1500};
+int RC_mid[6] = { 1500,   1484,   1428,   1484,   1500,   1500};
 int RC_max[6] = { 1908,   1908,   1908,   1908,   1908,   1908};
 
 // fail safe positions
