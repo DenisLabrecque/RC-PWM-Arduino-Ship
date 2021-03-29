@@ -10,10 +10,6 @@ const float DEADZONE = 0.09f; // Percent positive and negative throttle that is 
 const float SWITCH_TOLERANCE = 0.25; // Percent that a stick must reach to activate a function
 const float PWM_MIDPOINT = 1500;
 
-unsigned long rc_update;
-const int channels = 6;                   // specify the number of receiver channels
-float RC_in[channels];                    // an array to store the calibrated input from receiver
-
 void setup() {
   setup_pwmRead();
   setup_motors();
@@ -23,11 +19,6 @@ void setup() {
 
 int pwm_value;
 void loop() {
-  // if RC data is available or 25ms has passed since last update
-  // (adjust to be equal or greater than the frame rate of receiver)
-  if(RC_avail() || millis() - rc_update > 25)
-    rc_update = millis();
-
   // RC_decode() gets received inputs in order as a channel number, starting at channel 1, channel 2, etc.
   control(RC_decode(1), RC_decode(2), RC_decode(3), RC_decode(4), RC_decode(5), RC_decode(6));
 }

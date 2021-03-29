@@ -332,55 +332,46 @@ ISR(PCINT2_vect){                                                 // this functi
  *  RC OUTPUT FUNCTIONS
  */
 
- boolean RC_avail(){
+boolean RC_avail() {
     boolean avail = RC_data_rdy;
-    RC_data_rdy = LOW;                          // reset the flag
+    RC_data_rdy = LOW; // reset the flag
     return avail;
-    }
+}
 
-  float RC_decode(int CH){
-  
-  if(CH < 1 || CH > RC_inputs) return 0;     // if channel number is out of bounds return zero.
-  
-  int i = CH - 1;                     
+// The signal is mapped from a pulsewidth into the range of -1 to +1, using the user defined calibrate() function in this code. 
+// 0 represents neutral or center stick on the transmitter
+// 1 is full displacement of a control input is one direction (i.e full left rudder)
+// -1 is full displacement of the control input in the other direction (i.e. full right rudder)
+int Min;
+int Mid;
+int Max;
+float RC_decode(int CH) {
+  // if channel number is out of bounds return zero.
+  if(CH < 1 || CH > RC_inputs) return 0;                  
 
   // determine the pulse width calibration for the RC channel. The default is 1000, 1500 and 2000us.
-  
-  int Min;
   if(CH <= size_RC_min) Min = RC_min[CH-1]; else Min = 1000;
-  
-  int Mid;
   if(CH <= size_RC_mid) Mid = RC_mid[CH-1]; else Mid = 1500;
-  
-  int Max;
   if(CH <= size_RC_max) Max = RC_max[CH-1]; else Max = 2000;
 
-  float CH_output;
-      
-  if(FAILSAFE(CH) == HIGH){                         // If the RC channel is outside of failsafe tolerances (10-330hz and 500-2500uS)
-      if(CH > size_RC_failsafe) CH_output = 0;      // and if no failsafe position has been defined, set output to neutral
-      else CH_output = RC_failsafe[i];              // or if defined set the failsafe position 
-  }
-  else{                                             // If the RC signal is valid
-    CH_output = calibrate(PW[i],Min,Mid,Max);       // calibrate the pulse width to the range -1 to 1.
-  }
-  return CH_output;                                 
+  // calibrate the pulse width to the range -1 to 1.
+  return calibrate(PW[CH-1], Min, Mid, Max);
+}
 
-  // The signal is mapped from a pulsewidth into the range of -1 to +1, using the user defined calibrate() function in this code. 
-
-  // 0 represents neutral or center stick on the transmitter
-  // 1 is full displacement of a control input is one direction (i.e full left rudder)
-  // -1 is full displacement of the control input in the other direction (i.e. full right rudder)
+short RC_raw(int channel) {
+  // if channel number is out of bounds return midpoint
+  if(channel < 1 || channel > RC_inputs)
+    return 1500;
+  else
+    return PW[channel-1];
 }
 
 /*
  *  Receiver Calibration
  */
-
  // NEED TO SPEED UP
-
-float calibrate(float Rx, int Min, int Mid, int Max){
-   float calibrated;
+float calibrated;
+float calibrate(float Rx, int Min, int Mid, int Max) {
    if (Rx >= Mid)
    {
     calibrated = map(Rx, Mid, Max, 0, 1000);  // map from 0% to 100% in one direction
