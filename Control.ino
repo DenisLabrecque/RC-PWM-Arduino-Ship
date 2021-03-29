@@ -29,7 +29,7 @@ void loop() {
   Serial.print(" Gear: ");
   Serial.println(RC_raw(5));
 
-  test_throttle(RC_raw(1));
+  mix_motors(RC_decode(1), RC_decode(2));
   control_rudder(RC_raw(2));
   animate_radar(RC_raw(5));
 }
