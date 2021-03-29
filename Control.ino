@@ -27,11 +27,11 @@ void loop() {
   Serial.print(" Rudder: ");
   Serial.print(RC_raw(2));
   Serial.print(" Gear: ");
-  Serial.println(RC_raw(5));
+  Serial.println(RC_raw(6));
 
   mix_motors(RC_decode(1), RC_decode(2));
   control_rudder(RC_raw(2));
-  animate_radar(RC_raw(5));
+  animate_radar(RC_raw(6));
 }
 
 
