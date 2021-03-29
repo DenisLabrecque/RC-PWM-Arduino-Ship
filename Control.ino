@@ -20,7 +20,18 @@ void setup() {
 int pwm_value;
 void loop() {
   // RC_decode() gets received inputs in order as a channel number, starting at channel 1, channel 2, etc.
-  control(RC_decode(1), RC_decode(2), RC_decode(3), RC_decode(4), RC_decode(5), RC_decode(6));
+  //control(RC_decode(1), RC_decode(2), RC_decode(3), RC_decode(4), RC_decode(5), RC_decode(6));
+
+  Serial.print("Throttle: ");
+  Serial.print(RC_raw(1));
+  Serial.print(" Rudder: ");
+  Serial.print(RC_raw(4));
+  Serial.print(" Gear: ");
+  Serial.println(RC_raw(5));
+
+  test_throttle(RC_raw(1));
+  control_rudder(RC_raw(1));
+  animate_radar(RC_raw(5));
 }
 
 
@@ -51,6 +62,23 @@ void print_received_values(float throttle, float aileron, float elevator, float 
   Serial.print(gear);
   Serial.print(" Auxiliary: ");
   Serial.println(auxiliary);
+}
+
+
+void test_throttle(short microseconds) {
+  digitalWrite(DIR_MOTOR1, HIGH);
+  digitalWrite(DIR_MOTOR2, HIGH);
+
+  short proportional;
+  if(microseconds < 1400 || microseconds > 1600) {
+    proportional = map((long)microseconds, 1000, 2000, 0, 255);
+  }
+  else {
+    proportional = 0;
+  }
+
+  analogWrite(PIN_PWM_MOTOR1, proportional);
+  analogWrite(PIN_PWM_MOTOR2, proportional);
 }
 
 

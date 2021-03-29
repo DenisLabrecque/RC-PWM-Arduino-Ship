@@ -4,7 +4,7 @@
 
 // Nano pins 11, 10, 9, 6, 5, and 3 are PWM.
 const byte PIN_PWM_RUDDER = A0;
-const byte PIN_PWM_RADAR = A1;
+const byte OUT_RADAR = A1;
 const byte OUT_STABILIZER1 = A2;
 const byte OUT_STABILIZER2 = A3;
 
@@ -17,9 +17,15 @@ Servo stabilizer2;
 
 void setup_servos() {
   rudder_servo.attach(PIN_PWM_RUDDER);
-  radar_servo.attach(PIN_PWM_RADAR);
+  radar_servo.attach(OUT_RADAR);
   stabilizer1.attach(OUT_STABILIZER1);
   stabilizer2.attach(OUT_STABILIZER2);
+}
+
+void control_rudder(short microseconds) {
+  rudder_servo.writeMicroseconds(microseconds);
+  stabilizer1.writeMicroseconds(microseconds);
+  stabilizer2.writeMicroseconds(microseconds);
 }
 
 void control_rudder(float rudder) {
@@ -30,6 +36,17 @@ void control_rudder(float rudder) {
   stabilizer2.write(rudderDegrees);
   Serial.print(" Rudder: ");
   Serial.print(rudderDegrees);
+}
+
+void animate_radar(short microseconds) {
+  if(microseconds > PWM_MIDPOINT) {
+    if(radar_servo.attached() == false)
+      radar_servo.attach(OUT_RADAR);
+    
+    radar_servo.writeMicroseconds(PWM_MIDPOINT + RADAR_SPEED);
+  }
+  else if(radar_servo.attached())
+    radar_servo.detach();
 }
 
 // Radar controlled by continuous rotation servo.
