@@ -25,12 +25,12 @@ void loop() {
   Serial.print("Throttle: ");
   Serial.print(RC_raw(1));
   Serial.print(" Rudder: ");
-  Serial.print(RC_raw(4));
+  Serial.print(RC_raw(2));
   Serial.print(" Gear: ");
   Serial.println(RC_raw(5));
 
   test_throttle(RC_raw(1));
-  control_rudder(RC_raw(1));
+  control_rudder(RC_raw(2));
   animate_radar(RC_raw(5));
 }
 
