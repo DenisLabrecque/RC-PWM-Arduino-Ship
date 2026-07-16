@@ -49,11 +49,7 @@ void setup() {
   stab_r_servo.attach(PIN_PWM_STAB_R);
 
   // nRF24
-  radio.begin();
-  radio.openReadingPipe(0, address);
-  radio.setPALevel(RF24_PA_MIN);
-  radio.setPayloadSize(sizeof(Data_Package));
-  radio.startListening();
+  start_receiver();
 
   Serial.print("CRC length: ");
   Serial.println(radio.getCRCLength());
@@ -63,8 +59,9 @@ void setup() {
   Serial.println(sizeof(Data_Package));
 }
 
-void loop() {
-// Check whether there is data to be received
+void loop()
+{
+  // Check whether there is data to be received
   if (radio.available())
   {
     Serial.print("Millis: ");
@@ -74,7 +71,19 @@ void loop() {
     radio.read(&data, sizeof(Data_Package)); // Read the whole data and store it into the 'data' structure
   }
 
-  // Make sure that radio signals are being received, otherwise cutoff power to avoid ramming things
+  // Something may be wrong, we should be receiving, purge the system
+  if (millis() - last_reception_millis > 500)
+  {
+    radio.flush_rx();
+  }
+
+  if (millis() - last_reception_millis > 2000)
+  {
+    reinitialize_receiver();
+    last_reception_millis = millis();
+  }
+
+  // Normal case, everything running smoothly
   if (millis() - last_reception_millis < 500) {
     // Servos - position in degrees from 0 to 180, 90 being the midpoint
     short rudderDegrees = map(data.rudder, -100, 100, (180 - 30), (0 + 30)); // Removes 30 degrees to keep linkages safe; mapped "upside-down" for correct direction
@@ -97,7 +106,9 @@ void loop() {
     analogWrite(PIN_PWM_MOTOR1, convert_100_100_to_0_255(data.throttle)); // 0 - 255
     analogWrite(PIN_PWM_MOTOR2, convert_100_100_to_0_255(data.throttle)); // 0 - 255
   }
-  else {
+  // Bad case, cut off power to avoid ramming things
+  else
+  {
     // Servos
     rudder_servo.write(90);
     stab_l_servo.write(90);
@@ -117,7 +128,7 @@ void loop() {
 int convert_100_100_to_0_255(int valueSigned) {
   long speed = map(abs(valueSigned), 0, 100, 0, 170); // NOTE: the motors were fast anyway, so removed power from 255
   // Current motors just make noise below a certain speed, so don't send a signal below that speed
-  if (speed < 10)
+  if (speed < 12)
     return 0;
   return speed;
 }
@@ -126,4 +137,21 @@ short convert_signed_direction_to_HIGH_LOW(int signedDirection) {
   if (signedDirection >= 0)
     return HIGH;
   return LOW;
+}
+
+void reinitialize_receiver()
+{
+  start_receiver();
+  last_reception_millis = millis(); // prevent repeated resets
+  Serial.println("Radio reinitialized");
+}
+
+// Starts or restarts the nRF24 module
+void start_receiver()
+{
+  radio.begin();
+  radio.openReadingPipe(0, address);
+  radio.setPALevel(RF24_PA_MIN);
+  radio.setPayloadSize(sizeof(Data_Package));
+  radio.startListening();
 }
