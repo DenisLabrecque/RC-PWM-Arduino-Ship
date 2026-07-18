@@ -16,7 +16,9 @@ const byte DIR_MOTOR2 = 4; // Digital I/O pin
 const byte PIN_CE = A1; // yellow
 const byte PIN_CSN = 8; // orange
 
-unsigned long last_reception_millis; // Keep track of when we last got radio reception
+unsigned long last_packet_millis = 0;
+unsigned long last_radio_reset_millis = 0;
+
 Servo rudder_servo;
 Servo stab_l_servo;
 Servo stab_r_servo;
@@ -33,9 +35,10 @@ struct Data_Package {
 };
 Data_Package data; // Create a variable with the above structure
 
-void setup() {
+void setup()
+{
   Serial.begin(9600);
-  last_reception_millis = 0;
+  last_packet_millis = 0;
 
   // Cytron/motors
   pinMode(PIN_PWM_MOTOR1, OUTPUT);
@@ -65,26 +68,23 @@ void loop()
   if (radio.available())
   {
     Serial.print("Millis: ");
-    Serial.println(millis() - last_reception_millis);
+    Serial.println(millis() - last_packet_millis);
 
-    last_reception_millis = millis();
+        last_packet_millis = millis();
     radio.read(&data, sizeof(Data_Package)); // Read the whole data and store it into the 'data' structure
   }
 
   // Something may be wrong, we should be receiving, purge the system
-  if (millis() - last_reception_millis > 500)
-  {
-    radio.flush_rx();
-  }
-
-  if (millis() - last_reception_millis > 2000)
+  if (millis() - last_packet_millis > 2000 &&
+      millis() - last_radio_reset_millis > 2000)
   {
     reinitialize_receiver();
-    last_reception_millis = millis();
+    last_radio_reset_millis = millis();
   }
 
   // Normal case, everything running smoothly
-  if (millis() - last_reception_millis < 500) {
+  if (millis() - last_packet_millis < 500)
+  {
     // Servos - position in degrees from 0 to 180, 90 being the midpoint
     short rudderDegrees = map(data.rudder, -100, 100, (180 - 30), (0 + 30)); // Removes 30 degrees to keep linkages safe; mapped "upside-down" for correct direction
     rudder_servo.write(rudderDegrees);
@@ -106,7 +106,7 @@ void loop()
     analogWrite(PIN_PWM_MOTOR1, convert_100_100_to_0_255(data.throttle)); // 0 - 255
     analogWrite(PIN_PWM_MOTOR2, convert_100_100_to_0_255(data.throttle)); // 0 - 255
   }
-  // Bad case, cut off power to avoid ramming things
+  // Failsafe, cut off power to avoid ramming things
   else
   {
     // Servos
@@ -142,7 +142,7 @@ short convert_signed_direction_to_HIGH_LOW(int signedDirection) {
 void reinitialize_receiver()
 {
   start_receiver();
-  last_reception_millis = millis(); // prevent repeated resets
+  last_packet_millis = millis(); // prevent repeated resets
   Serial.println("Radio reinitialized");
 }
 
