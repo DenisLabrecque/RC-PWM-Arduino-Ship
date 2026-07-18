@@ -18,6 +18,7 @@ const byte PIN_CSN = 8; // orange
 
 unsigned long last_packet_millis = 0;
 unsigned long last_radio_reset_millis = 0;
+bool failsafed = false;
 
 Servo rudder_servo;
 Servo stab_l_servo;
@@ -67,24 +68,17 @@ void loop()
   // Check whether there is data to be received
   if (radio.available())
   {
-    Serial.print("Millis: ");
-    Serial.println(millis() - last_packet_millis);
-
-        last_packet_millis = millis();
+    // Report how long it has been since failsafe
+    if (failsafed == true)
+    {
+      Serial.print(" for ");
+      Serial.print(millis() - last_packet_millis);
+      Serial.println("millis");
+      failsafed = false;
+    }
+    
     radio.read(&data, sizeof(Data_Package)); // Read the whole data and store it into the 'data' structure
-  }
 
-  // Something may be wrong, we should be receiving, purge the system
-  if (millis() - last_packet_millis > 2000 &&
-      millis() - last_radio_reset_millis > 2000)
-  {
-    reinitialize_receiver();
-    last_radio_reset_millis = millis();
-  }
-
-  // Normal case, everything running smoothly
-  if (millis() - last_packet_millis < 500)
-  {
     // Servos - position in degrees from 0 to 180, 90 being the midpoint
     short rudderDegrees = map(data.rudder, -100, 100, (180 - 30), (0 + 30)); // Removes 30 degrees to keep linkages safe; mapped "upside-down" for correct direction
     rudder_servo.write(rudderDegrees);
@@ -105,9 +99,19 @@ void loop()
     // Speed
     analogWrite(PIN_PWM_MOTOR1, convert_100_100_to_0_255(data.throttle)); // 0 - 255
     analogWrite(PIN_PWM_MOTOR2, convert_100_100_to_0_255(data.throttle)); // 0 - 255
+
+    // Print to serial monitor
+    Serial.print("Millis between receptions: ");
+    Serial.print(millis() - last_packet_millis);
+    Serial.print(", Throttle:");
+    Serial.print(data.throttle);
+    Serial.print(", Rudder ");
+    Serial.println(data.rudder);
+    last_packet_millis = millis();
   }
+  
   // Failsafe, cut off power to avoid ramming things
-  else
+  if (failsafed == false && millis() - last_packet_millis > 500)
   {
     // Servos
     rudder_servo.write(90);
@@ -116,12 +120,19 @@ void loop()
     // Motors
     analogWrite(PIN_PWM_MOTOR1, 0);
     analogWrite(PIN_PWM_MOTOR2, 0);
+    
+    // Print to serial monitor
+    Serial.print("Failsafed... ");
+    failsafed = true;
   }
 
-  // Serial.print("Throttle: ");
-  // Serial.print(data.throttle);
-  // Serial.print(" Rudder: ");
-  // Serial.println(data.rudder);
+  // Something may be wrong, we should be receiving, purge the system
+  if (millis() - last_packet_millis > 2000 &&
+      millis() - last_radio_reset_millis > 2000)
+  {
+    //reinitialize_receiver();
+    //last_radio_reset_millis = millis();
+  }
 }
 
 // Change radio data (-100 to 100) to range 0 - 255 (motors).
